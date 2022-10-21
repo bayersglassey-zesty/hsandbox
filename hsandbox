@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 """
 The Hacking Sandbox - hsandbox
 
@@ -70,7 +70,8 @@ class Hacking(object):
     filename = "sandbox.txt"
     template = "<cursor>"
     command = ""
-    use_old_sandbox = False
+    use_old_sandbox = True
+    use_tempdir = False
 
     @classmethod
     def get_label(cls):
@@ -342,9 +343,11 @@ class EventHandler(ProcessEvent):
 
 def screen(hacking, argv, vertical):
     argv[0] = os.path.abspath(argv[0])
-    workdir = tempfile.mkdtemp(prefix="hsandbox-")
+    if hacking.use_tempdir:
+        workdir = tempfile.mkdtemp(prefix="hsandbox-")
     try:
-        os.chdir(workdir)
+        if hacking.use_tempdir:
+            os.chdir(workdir)
         try:
             hsandbox = " ".join(argv)
             if "TMUX" in os.environ:
@@ -362,7 +365,8 @@ def screen(hacking, argv, vertical):
         except OSError:
             raise Error("Couldn't run 'tmux'.  Is it installed?")
     finally:
-        shutil.rmtree(workdir)
+        if hacking.use_tempdir:
+            shutil.rmtree(workdir)
 
     message = random.choice([
         "Great stuff you did. Hope you enjoyed it.",
@@ -463,8 +467,9 @@ Versioning examples:
 
 Options:
 
-  -c  - Continue editing the last sandbox for the given language.
-  -v  - Use vertical panes rather than horizontal.
+  -t         - Use a template, instead of editing the last sandbox for the given language.
+  -v         - Use vertical panes rather than horizontal.
+  --tempdir  - Use a temporary directory instead of current directory.
 
 """ % {"languages": describe_languages()}
 
@@ -501,10 +506,12 @@ def main(argv):
                 mode = "editor"
             elif option == "--runner":
                 mode = "runner"
-            elif option == "-c":
-                hacking.use_old_sandbox = True
+            elif option == "-t":
+                hacking.use_old_sandbox = False
             elif option == "-v":
                 vertical = True
+            elif option == "--tempdir":
+                hacking.use_tempdir = True
             else:
                 sys.exit(USAGE)
 
