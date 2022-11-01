@@ -468,7 +468,7 @@ Versioning examples:
 Options:
 
   -t         - Use a template, instead of editing the last sandbox for the given language.
-  -v         - Use vertical panes rather than horizontal.
+  -H         - Use horizontal panes rather than vertical.
   --tempdir  - Use a temporary directory instead of current directory.
 
 """ % {"languages": describe_languages()}
@@ -498,7 +498,7 @@ def main(argv):
         sys.exit(USAGE)
 
     mode = "screen"
-    vertical = False
+    vertical = True
 
     if len(argv) > 2:
         for option in argv[2:]:
@@ -508,8 +508,8 @@ def main(argv):
                 mode = "runner"
             elif option == "-t":
                 hacking.use_old_sandbox = False
-            elif option == "-v":
-                vertical = True
+            elif option == "-H":
+                vertical = False
             elif option == "--tempdir":
                 hacking.use_tempdir = True
             else:
